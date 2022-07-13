@@ -8,7 +8,7 @@ type Cache struct {
 
 type Key struct {
 	value    string
-	deadline *time.Time
+	deadline time.Time
 }
 
 func NewCache() Cache {
@@ -20,22 +20,23 @@ func (receiver Cache) Get(key string) (string, bool) {
 	if !ok {
 		return "", false
 	}
-	if result.deadline.Before(time.Now()) && result.deadline != nil {
+	if result.deadline.Before(time.Now()) && result.deadline.IsZero() {
 		delete(receiver.cache, key)
 		return "", false
 	}
 	return result.value, true
 }
 
-func (receiver Cache) Put(key, value string) {
+func (receiver *Cache) Put(key, value string) {
 	receiver.cache[key] = Key{value: value}
 }
 
 func (receiver Cache) Keys() []string {
 	var records []string
-	for k, v := range receiver.cache {
-		if v.deadline != nil && v.deadline.Before(time.Now()) {
-			delete(receiver.cache, k)
+	for k := range receiver.cache {
+		v := receiver.cache[k]
+		if v.deadline.IsZero() && v.deadline.Before(time.Now()) {
+			continue
 		} else {
 			records = append(records, k)
 		}
@@ -44,5 +45,5 @@ func (receiver Cache) Keys() []string {
 }
 
 func (receiver Cache) PutTill(key, value string, deadline time.Time) {
-	receiver.cache[key] = Key{value: value, deadline: &deadline}
+	receiver.cache[key] = Key{value: value, deadline: deadline}
 }
