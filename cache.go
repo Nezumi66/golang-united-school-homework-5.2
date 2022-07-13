@@ -44,6 +44,6 @@ func (receiver Cache) Keys() []string {
 	return records
 }
 
-func (receiver Cache) PutTill(key, value string, deadline time.Time) {
+func (receiver *Cache) PutTill(key, value string, deadline time.Time) {
 	receiver.cache[key] = Key{value: value, deadline: deadline}
 }
