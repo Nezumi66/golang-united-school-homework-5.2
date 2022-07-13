@@ -20,7 +20,7 @@ func (receiver Cache) Get(key string) (string, bool) {
 	if !ok {
 		return "", false
 	}
-	if result.deadline.Before(time.Now()) && result.deadline.IsZero() {
+	if result.deadline.Before(time.Now()) && !result.deadline.IsZero() {
 		delete(receiver.cache, key)
 		return "", false
 	}
@@ -35,7 +35,7 @@ func (receiver Cache) Keys() []string {
 	var records []string
 	for k := range receiver.cache {
 		v := receiver.cache[k]
-		if v.deadline.IsZero() && v.deadline.Before(time.Now()) {
+		if !v.deadline.IsZero() && v.deadline.Before(time.Now()) {
 			continue
 		} else {
 			records = append(records, k)
